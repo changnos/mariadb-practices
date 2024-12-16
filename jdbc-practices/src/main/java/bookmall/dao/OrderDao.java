@@ -33,17 +33,27 @@ public class OrderDao {
 	}
 
 	public void insertBook(OrderBookVo vo) {
-		try (Connection conn = getConnection();
-				PreparedStatement pstmt1 = conn.prepareStatement("insert into orders_book values (?, ?, ?, ?)");
-				PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");) {
+		try (Connection conn0 = getConnection();
+				PreparedStatement pstmt0 = conn0.prepareStatement("select title from book where id = ?");) {
+			pstmt0.setLong(1, vo.getBookNo());
+			ResultSet rs0 = pstmt0.executeQuery();
+			vo.setBookTitle(rs0.next() ? rs0.getString(1) : null);
+			rs0.close();
+			try (Connection conn = getConnection();
+					PreparedStatement pstmt1 = conn.prepareStatement("insert into orders_book values (?, ?, ?, ?, ?)");
+					PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");) {
 
-			pstmt1.setLong(1, vo.getBookNo());
-			pstmt1.setLong(2, vo.getOrderNo());
-			pstmt1.setInt(3, vo.getQuantity());
-			pstmt1.setInt(4, vo.getPrice());
-			pstmt1.executeUpdate();
+				pstmt1.setLong(1, vo.getBookNo());
+				pstmt1.setLong(2, vo.getOrderNo());
+				pstmt1.setInt(3, vo.getQuantity());
+				pstmt1.setInt(4, vo.getPrice());
+				pstmt1.setString(5, vo.getBookTitle());
+				pstmt1.executeUpdate();
 
-			pstmt2.executeQuery();
+				pstmt2.executeQuery();
+			} catch (SQLException e) {
+				System.out.println("error: " + e);
+			}
 		} catch (SQLException e) {
 			System.out.println("error: " + e);
 		}
@@ -87,7 +97,6 @@ public class OrderDao {
 		try (Connection conn = getConnection();
 				PreparedStatement pstmt = conn.prepareStatement("select * from orders_book where orders_id = ?");) {
 			pstmt.setLong(1, order_no);
-//			pstmt.setLong(2, user_no);
 
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
@@ -95,12 +104,14 @@ public class OrderDao {
 				Long orders_id = rs.getLong(2);
 				int quantity = rs.getInt(3);
 				int price = rs.getInt(4);
+				String book_title = rs.getString(5);
 
 				OrderBookVo vo = new OrderBookVo();
 				vo.setOrderNo(orders_id);
 				vo.setBookNo(book_id);
 				vo.setQuantity(quantity);
 				vo.setPrice(price);
+				vo.setBookTitle(book_title);
 
 				result.add(vo);
 			}

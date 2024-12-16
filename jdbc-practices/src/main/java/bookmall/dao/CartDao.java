@@ -13,18 +13,29 @@ import bookmall.vo.CartVo;
 public class CartDao {
 
 	public void insert(CartVo vo) {
-		try (Connection conn = getConnection();
-				PreparedStatement pstmt1 = conn.prepareStatement("insert into cart values (null, ?, ?, ?)");
-				PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");) {
-			pstmt1.setLong(1, vo.getUserNo());
-			pstmt1.setLong(2, vo.getBookNo());
-			pstmt1.setInt(3, vo.getQuantity());
-			pstmt1.executeUpdate();
+		try (Connection conn0 = getConnection();
+				PreparedStatement pstmt0 = conn0.prepareStatement("select title from book where id = ?");) {
+			pstmt0.setLong(1, vo.getBookNo());
+			ResultSet rs0 = pstmt0.executeQuery();
+			vo.setBookTitle(rs0.next() ? rs0.getString(1) : null);
+			rs0.close();
+			try (Connection conn = getConnection();
+					PreparedStatement pstmt1 = conn.prepareStatement("insert into cart values (null, ?, ?, ?, ?)");
+					PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");) {
+				pstmt1.setLong(1, vo.getUserNo());
+				pstmt1.setLong(2, vo.getBookNo());
+				pstmt1.setInt(3, vo.getQuantity());
+				pstmt1.setString(4, vo.getBookTitle());
+				pstmt1.executeUpdate();
 
-			ResultSet rs1 = pstmt2.executeQuery();
-			vo.setNo(rs1.next() ? rs1.getLong(1) : null);
+				ResultSet rs1 = pstmt2.executeQuery();
+				vo.setNo(rs1.next() ? rs1.getLong(1) : null);
 
-			rs1.close();
+				rs1.close();
+
+			} catch (SQLException e) {
+				System.out.println("error: " + e);
+			}
 		} catch (SQLException e) {
 			System.out.println("error: " + e);
 		}
@@ -54,12 +65,14 @@ public class CartDao {
 				Long user_id = rs.getLong(2);
 				Long book_id = rs.getLong(3);
 				int quantity = rs.getInt(4);
+				String book_title = rs.getString(5);
 
 				CartVo vo = new CartVo();
 				vo.setNo(id);
 				vo.setUserNo(user_id);
 				vo.setBookNo(book_id);
 				vo.setQuantity(quantity);
+				vo.setBookTitle(book_title);
 
 				result.add(vo);
 			}
@@ -86,5 +99,5 @@ public class CartDao {
 
 		return conn;
 	}
-	
+
 }
