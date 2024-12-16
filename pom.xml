@@ -7,4 +7,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>mariadb-practices</name>
+  <modules>
+  	<module>jdbc-practices</module>
+  </modules>
 </project>
