@@ -1,7 +1,6 @@
 package bookmall.vo;
 
 public class CartVo {
-	private Long no;
 	private Long user_no;
 	private Long book_no;
 	private int quantity;
@@ -31,14 +30,6 @@ public class CartVo {
 
 	public void setUserNo(Long user_no) {
 		this.user_no = user_no;
-	}
-
-	public Long getNo() {
-		return no;
-	}
-
-	public void setNo(Long no) {
-		this.no = no;
 	}
 
 	public int getPrice() {

@@ -20,18 +20,12 @@ public class CartDao {
 			vo.setBookTitle(rs0.next() ? rs0.getString(1) : null);
 			rs0.close();
 			try (Connection conn = getConnection();
-					PreparedStatement pstmt1 = conn.prepareStatement("insert into cart values (null, ?, ?, ?, ?)");
-					PreparedStatement pstmt2 = conn.prepareStatement("select last_insert_id() from dual");) {
+					PreparedStatement pstmt1 = conn.prepareStatement("insert into cart values (?, ?, ?, ?)");) {
 				pstmt1.setLong(1, vo.getUserNo());
 				pstmt1.setLong(2, vo.getBookNo());
 				pstmt1.setInt(3, vo.getQuantity());
 				pstmt1.setString(4, vo.getBookTitle());
 				pstmt1.executeUpdate();
-
-				ResultSet rs1 = pstmt2.executeQuery();
-				vo.setNo(rs1.next() ? rs1.getLong(1) : null);
-
-				rs1.close();
 
 			} catch (SQLException e) {
 				System.out.println("error: " + e);
@@ -61,14 +55,12 @@ public class CartDao {
 
 			ResultSet rs = pstmt.executeQuery();
 			while (rs.next()) {
-				Long id = rs.getLong(1);
-				Long user_id = rs.getLong(2);
-				Long book_id = rs.getLong(3);
-				int quantity = rs.getInt(4);
-				String book_title = rs.getString(5);
+				Long user_id = rs.getLong(1);
+				Long book_id = rs.getLong(2);
+				int quantity = rs.getInt(3);
+				String book_title = rs.getString(4);
 
 				CartVo vo = new CartVo();
-				vo.setNo(id);
 				vo.setUserNo(user_id);
 				vo.setBookNo(book_id);
 				vo.setQuantity(quantity);
